@@ -1,0 +1,136 @@
+---
+title: "Lab 4"
+author: "Alexander Ozornin"
+date: "December 26, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+```
+
+# Лабораторная работа 4
+
+## Пользуясь примером из лекции файл (`5.0.R`) проанализируйте [данные](https://archive.ics.uci.edu/ml/datasets/abalone) о возрасте и физ. характеристиках молюсков
+
+#Пользуясь примером из лекции файл (5.0.R) проанализируйте данные
+#о возрасте и физ. характеристиках молюсков
+#https://archive.ics.uci.edu/ml/datasets/abalone
+```{r}
+data <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data", header=TRUE, sep=",")
+summary(data)
+colnames(data)
+colnames(data) <- c("sex", "length", "diameter", "height", 
+                    "whole_weight", "shucked_weight",
+                    "viscera_weight", "shell_weight", "rings")
+colnames(data)
+data$sex <- factor(c("Female", "Infant", "Male")[data$sex])
+```
+
+```{r}
+par(mfrow=c(1, 3)) 
+hist(data$diameter, main = "Диаметр, мм")
+hist(data$height, main = "Высота, мм")
+hist(data$whole_weight, main = "Полный вес, гр")
+```
+
+Видим ассиметрию и выбросы
+
+>Визулизируем возможные зависимости
+
+```{r}
+par(mfrow=c(1, 2)) 
+plot(data$diameter, data$whole_weight,'p',main = "Зависимость веса от диаметра")
+plot(data$height, data$whole_weight,'p',main = "Зависимость веса от высоты")
+```
+
+Хорошо видна зависимость, нужно её исследовать
+
+>Построить линейные модели при помощи функции lm, посмотреть их характеристики
+
+```{r}
+lm1 <- lm(data$diameter ~ data$whole_weight)
+summary(lm1)
+plot(lm1)
+```
+```{r}
+lm2 <- lm(data$height ~ data$whole_weight)
+summary(lm2)
+plot(lm2)
+```
+
+>избавиться от выборосов, построить ещё модели и проверить их
+
+```{r}
+data <- data[data$diameter > 0.25,]
+data <- data[data$diameter < 0.52,]
+data <- data[data$height > 0.08,]
+data <- data[data$height < 0.18,]
+data <- data[data$whole_weight > 0.20,]
+data <- data[data$whole_weight < 1.40,]
+
+par(mfrow=c(1,3)) 
+hist(data$diameter, main = "Диаметр, мм")
+hist(data$height, main = "Высота, мм")
+hist(data$whole_weight, main = "Полный вес, гр")
+```
+
+```{r}
+lm3 <- lm(data$diameter ~ data$whole_weight)
+summary(lm3)
+plot(lm3)
+```
+
+```{r}
+lm4 <- lm(data$height ~ data$whole_weight)
+summary(lm4)
+plot(lm4)
+```
+
+>Разделить массив данных на 2 случайные части
+
+```{r}
+odds <- seq(1, nrow(data), by=2)
+shell.weight.in <- data[odds,]
+shell.weight.out <- data[-odds,]
+```
+
+>Подогнать модель по первой части
+
+```{r}
+lm5 <- lm(diameter ~ whole_weight, data=shell.weight.in)
+summary(lm5)
+```
+
+```{r}
+lm6 <- lm(height ~ whole_weight, data=shell.weight.in)
+summary(lm6)
+```
+
+>Спрогнозировать (функция predict) значения во второй части
+
+```{r}
+predict5 <- predict(lm5)
+predict6 <- predict(lm6)
+```
+
+>Проверить качесвто прогноза
+
+```{r}
+cor5.in <- cor(shell.weight.in$whole_weight, predict5)
+plot(shell.weight.in$whole_weight, predict5)
+
+cor5.out <- cor(shell.weight.out$whole_weight, predict5)
+plot(shell.weight.out$whole_weight, predict5)
+```
+Качество прогноза можно оценить с помощью коэффициента корреляции `r cor5.out`.
+
+```{r}
+cor6.in <- cor(shell.weight.in$whole_weight, predict6)
+plot(shell.weight.in$whole_weight, predict6)
+
+cor6.out <- cor(shell.weight.out$whole_weight, predict6)
+plot(shell.weight.out$whole_weight, predict6)
+```
+Качество прогноза можно оценить с помощью коэффициента корреляции `r cor6.out`.
