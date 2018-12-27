@@ -1,0 +1,185 @@
+---
+title: "Lab 5"
+author: "Alexander Ozornin"
+date: "December 26, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(gplots)
+library(multcomp)
+```
+
+# Лабораторная работа 5
+
+```{r}
+data = read.csv("../diet.csv",row.names=1)
+summary(data)
+```
+
+Переименуем колонки
+
+```{r}
+colnames(data) <- c("gender", "age", "height", "initial.weight", 
+                    "diet.type", "final.weight")
+data$diet.type <- factor(c("A", "B", "C")[data$diet.type])
+```
+
+Новая колонка: похудение
+
+```{r}
+data$weight.loss = data$initial.weight - data$final.weight
+```
+
+Различия по диетам
+
+```{r}
+boxplot(weight.loss~diet.type,data=data,col="light gray",
+        ylab = "Weight loss (kg)", xlab = "Diet type")
+abline(h=0,col="green")
+```
+
+Сбалансированность данных
+
+```{r}
+table(data$diet.type)
+```
+
+График групповых средних
+
+```{r}
+plotmeans(weight.loss ~ diet.type, data=data)
+aggregate(data$weight.loss, by = list(data$diet.type), FUN=sd)
+```
+
+Подгоним данные для дисперсионного анализа с помощью функции aov()
+
+```{r}
+fit <- aov(weight.loss ~ diet.type, data=data)
+summary(fit)
+```
+
+Попарные различия между средними значениями для всех групп
+
+```{r}
+TukeyHSD(fit)
+```
+
+Tukey honest significant differences test
+
+```{r}
+par(mar=c(5,4,6,2))
+tuk <- glht(fit, linfct=mcp(diet.type="Tukey"))
+plot(cld(tuk, level=.05),col="lightgrey")
+```
+
+## Задание
+
+>Добавить проверку на выборы и избавиться от них повторно проверсти все тесты и сравнить результаты с выбросами и без. Открыть [документ](https://www.sheffield.ac.uk/polopoly_fs/1.547015!/file/Diet_data_description.docx) и попытаться выполнить задания из него
+
+Найдем выбросы
+
+```{r}
+plot(data$weight.loss ~ data$diet.type)
+```
+
+Избавимся от выбросов
+
+```{r}
+data <- data %>%
+  filter(weight.loss >= 0 & weight.loss <= 8)
+```
+
+Повторный анализ
+
+```{r}
+boxplot(weight.loss~diet.type,data=data,col="light gray",
+        ylab = "Weight loss (kg)", xlab = "Diet type")
+abline(h=0,col="green")
+```
+
+Сбалансированость выборки
+
+```{r}
+table(data$diet.type)
+```
+
+График групповых средних
+
+```{r}
+plotmeans(weight.loss ~ diet.type, data=data)
+aggregate(data$weight.loss, by = list(data$diet.type), FUN=sd)
+```
+
+Подгонка
+
+```{r}
+fit <- aov(weight.loss ~ diet.type, data=data)
+summary(fit)
+```
+
+Попарные различия между средними значениями для всех групп
+
+```{r}
+TukeyHSD(fit)
+```
+
+Tukey honest significant differences test
+```{r}
+par(mar=c(5,4,6,2))
+tuk <- glht(fit, linfct=mcp(diet.type="Tukey"))
+plot(cld(tuk, level=.05),col="lightgrey")
+```
+
+### Вывод
+После удаления выбросов диета B стала лучше диаеты A.
+
+## Зависимость потери веса от пола
+
+Проверка выборки на плохие данные
+
+Сделаем данные о поле более удобными
+
+```{r}
+data <- data %>% filter(!is.na(gender))
+data$gender <- factor( c('Female', 'Male')[as.ordered(data$gender)] )
+summary(data)
+```
+
+Проверка различия
+
+```{r}
+boxplot(weight.loss~gender,data=data,col="light gray",
+        ylab = "Weight loss (kg)", xlab = "Diet type")
+abline(h=0,col="green")
+```
+
+График групповых средних
+
+```{r}
+plotmeans(weight.loss ~ gender, data=data)
+aggregate(data$weight.loss, by = list(data$gender), FUN=sd)
+```
+
+Подгоним данные для дисперсионного анализа с помощью функции aov()
+```{r}
+fit <- aov(weight.loss ~ gender, data=data)
+summary(fit)
+```
+
+Попарные различия между средними значениями для всех групп
+```{r}
+THSD <- TukeyHSD(fit)
+```
+
+Tukey honest significant differences test
+```{r}
+par(mar=c(5,4,6,2))
+tuk <- glht(fit, linfct=mcp(gender="Tukey"))
+plot(cld(tuk, level=.05),col="lightgrey")
+```
+
+### Вывод
+Потеря веса незначительно зависит от пола (`r THSD$gender[which(colnames(THSD$gender) == 'p adj')]` < 0.95).
