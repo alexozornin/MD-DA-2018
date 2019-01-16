@@ -10,7 +10,7 @@
     <div class="interface">
       <div class="button" @click="predict()">Предсказать</div>
     </div>
-    <div v-if="result" class="res">Результат: {{result}}</div>
+    <div v-if="result" :class="resclass">{{result}}</div>
     <div class="subs">
       Озорнин Александр, Матросова Наталья
     </div>
@@ -18,20 +18,28 @@
 </template>
 
 <script>
+const successClasses = {
+  true: 'success',
+  false: 'fail'
+}
 export default {
   data() {
     return {
       result: "",
-      value: ""
+      value: "",
+      resclass: "success"
     };
   },
   methods: {
     async predict() {
+      this.resclass = "success";
+      this.result = "Подождите...";
       let res = await this.$http.post("/predict", {
         value: this.value
       });
-      if (res && res.body) {
-        this.result = res.body;
+      if (res && res.body && res.body.msg) {
+        this.result = res.body.msg;
+        this.resclass = successClasses[res.body.success]
       }
     }
   }
@@ -62,7 +70,13 @@ input {
   text-align: right;
   font-size: 14px;
 }
-.res {
+.success {
+  margin: 5px;
+  text-align: center;
+  font-size: 20px;
+}
+.fail {
+  color: darkred;
   margin: 5px;
   text-align: center;
   font-size: 20px;
