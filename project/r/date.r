@@ -20,7 +20,6 @@ datalen = length(data$close)
 
 data$date <- as.Date(data$date)
 data$day <- day(data$date)
-data$ivolume <- 1 / data$close
 
 closeMean <- mean(data$close)
 

@@ -23,12 +23,12 @@ module.exports = (dataset, value) => {
             else {
                 resolve(JSON.stringify({
                     success: true,
-                    msg: 'Предсказанное значение: ' + res
+                    msg: 'Прогнозируемое значение: $' + res
                 }));
             }
         });
         rmodule.on('stderr', (line) => {
-            console.log('STDERR', line);
+            //console.log('STDERR', line);
         })
         rmodule.on('exit', () => {
             resolve(JSON.stringify({

@@ -1,0 +1,97 @@
+---
+title: "Course project"
+author: "Alexander Ozornin, Natasha Matrosova"
+date: "January 16, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(forecast)
+library(spatstat)
+library(lubridate)
+```
+
+## Исследование зависимости котировок XOM от времени
+### Курсовая работа по модулю "Методы анализа Big Data"
+
+#### Загрузка данных
+```{r}
+data <- read.csv("./data/XOM.csv")
+```
+
+```{r}
+datalen = length(data$close)
+```
+
+#### Преобразование даты из формата YYYY-MM-DD в объект даты, поучение номера дня в месяце
+```{r}
+data$date <- as.Date(data$date)
+data$day <- day(data$date)
+```
+
+#### Сводка по набору данных
+```{r}
+summary(data)
+```
+
+#### График зависимости котировок от времени
+```{r}
+plot(data$close, xlab = "Time", ylab = "Value, $", type = "l")
+```
+
+#### Среднее значение котировок за все время
+```{r}
+closeMean <- mean(data$close)
+closeMean
+```
+
+#### Получение средних данных по дням месяца и рассчет коэффициентов
+```{r}
+dayNum <- numeric(31)
+dayClose <- numeric(31)
+for (i in 1:datalen) {
+  dayNum[data$day[i]] <- dayNum[data$day[i]] + 1
+  dayClose[data$day[i]] <- dayClose[data$day[i]] + data$close[i]
+}
+dayClose <- dayClose / dayNum
+dayCoefficient <- dayClose / closeMean
+```
+
+#### Создание тренировочной и тестовой выборок. Тренировочная выборка представляет из себя данные до 2018 года, а тестовая - за 2018 год. Выборки имеют частоту "12" - помесячно
+```{r}
+trainSet <- ts(data$close, start = c(2014, 1, 10), end = c(2017, 12, 31), frequency = 12)
+testSet <- ts(data$close, start = c(2018, 1, 1), end = c(2018, 12, 31), frequency = 12)
+```
+Для будущего предсказания значений все данные, включая 2018 год, будут использоваться как тренировочная выборка.
+
+#### График по сезонам
+```{r}
+ggseasonplot(trainSet)
+```
+
+#### Прогноз значений для ближайших 12 месяцев с помощью arima
+```{r}
+monthArima <- auto.arima(trainSet)
+monthForecast <- forecast(monthArima, h = 12)
+monthForecast
+```
+
+#### График прогнозов
+```{r}
+plot(monthForecast)
+```
+
+#### Проверка статистической значимости модели
+```{r}
+checkresiduals(monthArima)
+Box.test(monthArima$residuals, lag=3, type='Ljung-Box', fitdf=0)
+```
+В данном случае модель является статистичеки значимой, так как Q* больше, чем X-squared.
+
+#### Провека качества модели и прогнозов
+```{r}
+accuracy(monthForecast, testSet)
+```
+Качество модели достаточно высокое, в прогнозе средняя ошибка в процентах (MPE) имеет низкое значение.
