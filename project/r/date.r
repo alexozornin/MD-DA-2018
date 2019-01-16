@@ -18,8 +18,6 @@ if (year(fcdate) != 2019) {
 
 datalen = length(data$close)
 
-print(datalen)
-
 data$date <- as.Date(data$date)
 data$day <- day(data$date)
 data$hop <- numeric(datalen)
@@ -37,7 +35,6 @@ for(i in 2:datalen-1) {
 data <- data[data$hop < 0.05,]
 
 datalen = length(data$close)
-print(datalen)
 
 for (i in 1:datalen) {
   dayNum[data$day[i]] <- dayNum[data$day[i]] + 1
