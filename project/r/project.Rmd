@@ -44,7 +44,17 @@ plot(data$close, xlab = "Time", ylab = "Value, $", type = "l")
 #### Среднее значение котировок за все время
 ```{r}
 closeMean <- mean(data$close)
-closeMean
+print(closeMean)
+```
+
+#### Избавление от выбросов
+```{r}
+for(i in 2:datalen-1) {
+  hop <- abs(2 * data$close[i] - data$close[i - 1] - data$close[i + 1]) / data$close[i]
+  data$hop[i] <- hop[1]
+}
+data <- data[data$hop < 0.05,]
+datalen = length(data$close)
 ```
 
 #### Получение средних данных по дням месяца и рассчет коэффициентов
@@ -71,7 +81,7 @@ testSet <- ts(data$close, start = c(2018, 1, 1), end = c(2018, 12, 31), frequenc
 ggseasonplot(trainSet)
 ```
 
-#### Прогноз значений для ближайших 12 месяцев с помощью arima
+#### Прогноз значений для ближайших 12 месяцев с помощью ARIMA
 ```{r}
 monthArima <- auto.arima(trainSet)
 monthForecast <- forecast(monthArima, h = 12)

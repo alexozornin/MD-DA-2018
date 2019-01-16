@@ -18,13 +18,27 @@ if (year(fcdate) != 2019) {
 
 datalen = length(data$close)
 
+print(datalen)
+
 data$date <- as.Date(data$date)
 data$day <- day(data$date)
+data$hop <- numeric(datalen)
 
 closeMean <- mean(data$close)
 
 dayNum <- numeric(31)
 dayClose <- numeric(31)
+
+for(i in 2:datalen-1) {
+  hop <- abs(2 * data$close[i] - data$close[i - 1] - data$close[i + 1]) / data$close[i]
+  data$hop[i] <- hop[1]
+}
+
+data <- data[data$hop < 0.05,]
+
+datalen = length(data$close)
+print(datalen)
+
 for (i in 1:datalen) {
   dayNum[data$day[i]] <- dayNum[data$day[i]] + 1
   dayClose[data$day[i]] <- dayClose[data$day[i]] + data$close[i]
