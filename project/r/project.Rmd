@@ -47,6 +47,31 @@ closeMean <- mean(data$close)
 print(closeMean)
 ```
 
+#### Медиана
+```{r}
+median(data$close)
+```
+
+#### Дисперсия
+```{r}
+var(data$close)
+```
+
+#### Стандартное отклонение
+```{r}
+sd(data$close)
+```
+
+#### Минимальное значение
+```{r}
+min(data$close)
+```
+
+#### Максимальное значение
+```{r}
+max(data$close)
+```
+
 #### Избавление от выбросов
 ```{r}
 for(i in 2:datalen-1) {

@@ -253,6 +253,31 @@ data$day &lt;- day(data$date)</code></pre>
 print(closeMean)</code></pre>
 <pre><code>## [1] 77.4452</code></pre>
 </div>
+<div class="section level4">
+<h4>Медиана</h4>
+<pre class="r"><code>median(data$close)</code></pre>
+<pre><code>## [1] 77.9298</code></pre>
+</div>
+<div class="section level4">
+<h4>Дисперсия</h4>
+<pre class="r"><code>var(data$close)</code></pre>
+<pre><code>## [1] 24.51068</code></pre>
+</div>
+<div id="-" class="section level4">
+<h4>Стандартное отклонение</h4>
+<pre class="r"><code>sd(data$close)</code></pre>
+<pre><code>## [1] 4.950826</code></pre>
+</div>
+<div id="-" class="section level4">
+<h4>Минимальное значение</h4>
+<pre class="r"><code>min(data$close)</code></pre>
+<pre><code>## [1] 60.3055</code></pre>
+</div>
+<div id="-" class="section level4">
+<h4>Максимальное значение</h4>
+<pre class="r"><code>max(data$close)</code></pre>
+<pre><code>## [1] 88.0921</code></pre>
+</div>
 <div id="--" class="section level4">
 <h4>Избавление от выбросов</h4>
 <pre class="r"><code>for(i in 2:datalen-1) {
