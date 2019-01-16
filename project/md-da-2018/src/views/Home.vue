@@ -1,11 +1,12 @@
 <template>
   <div>
-    <header>
-      MD-DA-2018
-    </header>
+    <header>MD-DA-2018</header>
     <div class="interface">
-      <input type="text" v-model="date" placeholder="Дата YYYY-MM-DD">
-      <input type="text" v-model="volume" placeholder="Предполагаемый объем">
+      <select v-model="type">
+        <option value="date">По дате</option>
+        <option value="volume">По объему</option>
+      </select>
+      <input type="text" v-model="value" :placeholder="placeholders[type]">
     </div>
     <div class="interface">
       <div class="button" @click="predict()">Предсказать</div>
@@ -15,30 +16,32 @@
 </template>
 
 <script>
+const placeholders = {
+  date: "Дата YYYY-MM-DD",
+  volume: "Объем",
+  def: ""
+};
 export default {
   data() {
     return {
+      placeholders,
       result: "",
-      date: "",
-      volume: ""
-    }
+      type: "date",
+      value: ""
+    };
   },
   methods: {
     async predict() {
-      console.log({
-        date: this.date,
-        volume: this.volume
-      });
       let res = await this.$http.post("/predict", {
-        date: this.date,
-        volume: this.volume
+        type: this.type,
+        value: this.value
       });
       if (res && res.body) {
-      this.result = res.body;
+        this.result = res.body;
       }
     }
   }
-}
+};
 </script>
 
 <style>
@@ -49,7 +52,7 @@ header {
   font-size: 32px;
 }
 input {
-  margin: 5px;
+  padding: 5px;
 }
 .interface {
   display: flex;
