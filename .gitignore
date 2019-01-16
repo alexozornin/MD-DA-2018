@@ -38,6 +38,7 @@ rsconnect/
 /diet.csv
 /project/md-da-2018/dist
 
+Rplots.pdf
 .DS_Store
 node_modules
 
